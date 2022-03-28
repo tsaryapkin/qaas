@@ -63,5 +63,4 @@ class QuizInvitationFactory(factory.django.DjangoModelFactory):
 
     quiz = factory.SubFactory(QuizFactory)
     email = factory.Faker("email")
-
     key = factory.Faker("word")

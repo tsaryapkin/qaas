@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import path, re_path
 from rest_framework.routers import DefaultRouter
 
 from .views import *
@@ -12,10 +12,11 @@ router.register("quizzes", QuizViewSet, basename="quizzes")
 
 
 urlpatterns = router.urls
-urlpatterns.append(
+urlpatterns += [
     re_path(
         r"accept-invite/(?P<key>\w+)/?$",
         accept_invitation,
         name="accept-invite",
-    )
-)
+    ),
+    path("report/", daily_report, name="daily-report"),
+]

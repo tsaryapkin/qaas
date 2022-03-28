@@ -6,7 +6,7 @@ from operator import itemgetter, or_
 from typing import Any, Dict, Iterable, Iterator, Optional, Tuple
 
 from django.db import IntegrityError, models, transaction
-from django.db.models import Prefetch, Q, QuerySet, Subquery, Sum
+from django.db.models import Count, Prefetch, Q, QuerySet, Subquery, Sum
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
@@ -47,7 +47,15 @@ class DeepQuizQueryset(models.QuerySet):
         )
 
 
-class Quiz(TimestampedModel):
+class TodayRecordsMixin:
+    @classmethod
+    def get_today_records(cls):
+        assert hasattr(cls, "created_at")
+        today = datetime.datetime.today()
+        return cls.objects.filter(created_at__date=today)
+
+
+class Quiz(TodayRecordsMixin, TimestampedModel):
     STATUS = Choices("draft", "published", "closed")
 
     author = models.ForeignKey(
@@ -83,6 +91,30 @@ class Quiz(TimestampedModel):
     @property
     def question_cnt(self) -> int:
         return self.questions.count()
+
+    @property
+    def invitees_summary(self) -> QuerySet:
+        """
+        Count of invitees base on their status
+        [{'accepted': True, 'count': 1}]
+        """
+        return (
+            self.invitations.values("accepted")
+            .annotate(count=Count("pk"))
+            .order_by("accepted")
+        )
+
+    @property
+    def participants_summary(self) -> QuerySet:
+        """
+        Count of participants base on their status
+        [{'status': 'attempted", 'count': 1}]
+        """
+        return (
+            self.participants.values("status")
+            .annotate(count=Count("pk"))
+            .order_by("status")
+        )
 
     @classmethod
     def for_user_or_participant(
@@ -159,7 +191,7 @@ class Quiz(TimestampedModel):
         )
 
 
-class QuizInvitation(AbstractBaseInvitation):
+class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
     quiz = models.ForeignKey(
         Quiz,
         on_delete=models.CASCADE,
@@ -167,7 +199,9 @@ class QuizInvitation(AbstractBaseInvitation):
         verbose_name="quiz",
     )
     email = models.EmailField(verbose_name="e-mail address")
-    created = models.DateTimeField(verbose_name="created", default=timezone.now)
+    created_at = models.DateTimeField(
+        verbose_name="created", default=timezone.now
+    )
 
     class Meta:
         unique_together = "quiz", "email"
@@ -229,7 +263,7 @@ class QuizInvitation(AbstractBaseInvitation):
                 )
 
 
-class QuizParticipant(TimestampedModel):
+class QuizParticipant(TodayRecordsMixin, TimestampedModel):
     STATUS = Choices("accepted", "attempted", "completed")
 
     email = models.EmailField(verbose_name="e-mail")

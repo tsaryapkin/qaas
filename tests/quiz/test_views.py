@@ -153,7 +153,7 @@ def test_participant_cannot_answer_same_question_twice(client, quiz):
     }
     url = reverse("quizzes-answer", args=[quiz.id])
     response = client.post(url, request_data)
-    assert response.status_code == 201
+    assert response.status_code == 200
     response = client.post(url, request_data)
     assert response.status_code == 400
 
@@ -183,7 +183,7 @@ def test_invitation_is_not_sent_twice(client, user):
 def test_can_accept_invitation(client):
     quiz = QuizFactory(questions=[])
     invitation = QuizInvitationFactory(
-        quiz=quiz, created=datetime.now(), sent=datetime.now()
+        quiz=quiz, created_at=datetime.now(), sent=datetime.now()
     )
     url = reverse("accept-invite", args=[invitation.key])
     response = client.get(url)

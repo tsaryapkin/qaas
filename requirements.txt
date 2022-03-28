@@ -22,4 +22,6 @@ django-invitations
 django-annoying
 django-taggit
 pytest-mock
+django-sql-utils
+djangorestframework-dataclasses
 

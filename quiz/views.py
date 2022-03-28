@@ -1,21 +1,30 @@
+import csv
+import datetime
+import json
 from typing import Any, Dict, Optional
 
 from annoying.functions import get_object_or_None
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import QuerySet
+from django.http import HttpResponse
 from invitations.exceptions import AlreadyAccepted, AlreadyInvited
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import APIException
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+
+from core.utils import datetime_to_str
 
 from .filters import QuizFilter
 from .forms import CleanInvitationMixin
 from .jobs import notify_participants
 from .models import *
+from .report import DailyReport, get_daily_report
 from .serializers import *
 
 __all__ = [
@@ -24,6 +33,7 @@ __all__ = [
     "AnswerViewSet",
     "QuizViewSet",
     "accept_invitation",
+    "daily_report",
 ]
 
 
@@ -72,6 +82,7 @@ class QuizMakerViewSet(
         "list": QuizMakerListSerializer,
         "invitees": InviteeSerializer,
         "participants": ParticipantSerializer,
+        "progress": ProgressSerializer,
     }
     filterset_class = QuizFilter
 
@@ -87,6 +98,11 @@ class QuizMakerViewSet(
     def invite(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
         status_code = status.HTTP_400_BAD_REQUEST
+        if len(request.data) > settings.MAX_INVITEES_PER_REQUEST:
+            raise APIException(
+                code=status_code,
+                detail=f"The number of invitees exceed the limit: {settings.MAX_INVITEES_PER_REQUEST} ",
+            )
         response = {"valid": [], "invalid": []}
         for invitee in request.data:
             try:
@@ -123,8 +139,14 @@ class QuizMakerViewSet(
 
     @action(detail=True, methods=["get"])
     def participants(self, request, *args, **kwargs) -> Response:
+        """Quiz participants and their scores"""
         quiz = self.get_object()
         return self._paginated_response(quiz.participants.all())
+
+    @action(detail=True, methods=["get"])
+    def progress(self, request, *args, **kwargs) -> Response:
+        quiz = self.get_object()
+        return Response(self.get_serializer(quiz).data)
 
     @action(detail=True, methods=["get"])
     def questions(self, request, *args, **kwargs) -> Response:
@@ -183,6 +205,7 @@ class QuizViewSet(
     serializer_action_classes = {
         "answer": ParticipantAnswerSerializer,
         "progress": ParticipantProgressSerializer,
+        "list": QuizMakerListSerializer,
     }
 
     def get_queryset(self):
@@ -219,12 +242,10 @@ class QuizViewSet(
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
+        serializer.save()
         return Response(
             ParticipantProgressSerializer(participant).data,
-            status=status.HTTP_201_CREATED,
-            headers=headers,
+            status=status.HTTP_200_OK,
         )
 
     @action(
@@ -259,3 +280,31 @@ def accept_invitation(request, key) -> Response:
     return Response(
         data={"quiz": f"{invitation.quiz.get_absolute_url()}?token={key}"}
     )
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def daily_report(request: Request) -> HttpResponse:
+    """
+    daily report about the service usage
+    """
+    known_formats = {"json": "application/json", "csv": "text/csv"}
+    format_ = request.query_params.get("format", "csv")
+    if format_ not in known_formats:
+        return HttpResponse(
+            "Format is not specified", status=status.HTTP_400_BAD_REQUEST
+        )
+    response_kwargs = {
+        "content_type": known_formats[format_],
+        "headers": {
+            "Content-Disposition": f'attachment; filename="report-{datetime_to_str(datetime.datetime.now())}.{format_}"'
+        },
+    }
+    report = get_daily_report()
+    if format_ == "json":
+        return Response(ReportSerializer(report).data, **response_kwargs)
+    else:
+        response = HttpResponse(**response_kwargs)
+        writer = csv.writer(response)
+        writer.writerows(report.as_rows)
+        return response

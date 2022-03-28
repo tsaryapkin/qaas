@@ -7,9 +7,11 @@ from django.db.models import QuerySet
 from django.db.utils import IntegrityError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework_dataclasses.serializers import DataclassSerializer
 from taggit.serializers import TaggitSerializer, TagListSerializerField
 
 from .models import *
+from .report import DailyReport, QuizParticipantEntry, QuizReportEntry
 
 __all__ = [
     "QuizMakerListSerializer",
@@ -21,6 +23,8 @@ __all__ = [
     "TakeQuizSerializer",
     "ParticipantAnswerSerializer",
     "ParticipantProgressSerializer",
+    "ProgressSerializer",
+    "ReportSerializer",
 ]
 
 
@@ -122,13 +126,26 @@ class QuizMakerListSerializer(TaggitSerializer, serializers.ModelSerializer):
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizParticipant
-        fields = "id", "email", "status", "completed_at", "score_str"
+        fields = (
+            "id",
+            "email",
+            "status",
+            "completed_at",
+            "score_str",
+            "answered_questions_count",
+        )
+
+
+class ProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quiz
+        fields = "invitees_summary", "participants_summary"
 
 
 class InviteeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizInvitation
-        exclude = "email", "created", "quiz"
+        exclude = "created_at", "quiz", "inviter", "key"
 
 
 class TakeAnswerSerializer(serializers.ModelSerializer):
@@ -150,12 +167,27 @@ class TakeQuestionSerializer(serializers.ModelSerializer):
 
 
 class TakeQuizSerializer(TaggitSerializer, serializers.ModelSerializer):
+    """
+    Quiz for participant
+    """
+
     questions = TakeQuestionSerializer(many=True)
     tags = TagListSerializerField()
+    link = serializers.HyperlinkedIdentityField(
+        read_only=True, view_name="quizzes-detail"
+    )
 
     class Meta:
         model = Quiz
-        fields = "id", "slug", "title", "description", "questions", "tags"
+        fields = (
+            "id",
+            "slug",
+            "title",
+            "description",
+            "questions",
+            "tags",
+            "link",
+        )
 
 
 class ParticipantRelatedQuestionField(serializers.PrimaryKeyRelatedField):
@@ -219,3 +251,18 @@ class ParticipantProgressSerializer(serializers.ModelSerializer):
             "total_questions_count",
             "remaining_questions",
         )
+
+
+class QuizReportEntrySerializer(DataclassSerializer):
+    class Meta:
+        dataclass = QuizReportEntry
+
+
+class QuizParticipantReportEntrySerializer(DataclassSerializer):
+    class Meta:
+        dataclass = QuizParticipantEntry
+
+
+class ReportSerializer(DataclassSerializer):
+    class Meta:
+        dataclass = DailyReport

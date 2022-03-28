@@ -1,3 +1,4 @@
+import datetime
 import importlib
 import random
 import string
@@ -27,3 +28,7 @@ def import_attribute(path):
     pkg, attr = path.rsplit(".", 1)
     ret = getattr(importlib.import_module(pkg), attr)
     return ret
+
+
+def datetime_to_str(val: datetime.datetime) -> str:
+    return val.strftime("%Y_%m_%d_%H%M%S") if val else ""

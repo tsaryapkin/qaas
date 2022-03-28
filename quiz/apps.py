@@ -7,3 +7,4 @@ class QuizConfig(AppConfig):
 
     def ready(self):
         from . import signals  # noqa
+        from . import jobs  # noqa

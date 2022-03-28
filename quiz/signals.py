@@ -14,6 +14,7 @@ def on_participant_answer_saved(sender, instance: ParticipantAnswer, **kwargs):
         participant.status = QuizParticipant.STATUS.attempted
     else:
         participant.status = QuizParticipant.STATUS.completed
+        participant.score = participant._score
     participant.save()
 
 

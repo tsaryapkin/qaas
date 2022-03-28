@@ -1,8 +1,9 @@
 import datetime
 import logging
 from functools import reduce
-from operator import or_
-from typing import Optional
+from itertools import groupby
+from operator import or_, itemgetter
+from typing import Optional, Dict, Any, Tuple, Iterable
 
 from django.db import IntegrityError, models, transaction
 from django.db.models import Prefetch, Q, QuerySet, Subquery, Sum
@@ -108,6 +109,54 @@ class Quiz(TimestampedModel):
     def max_score(self) -> int:
         """Max number of scores that can be achieved"""
         return self.questions.all().aggregate(Sum("score"))["score__sum"]
+
+    def summary(self) -> Iterable[Dict[str, Any]]:
+        common_context = {"quiz_title": self.title, "max_score": self.max_score}
+        participants = (
+            self.participants.prefetch_related(
+                Prefetch(
+                    "answers",
+                    queryset=ParticipantAnswer.objects.select_related("answer"),
+                )
+            )
+            .filter(status=QuizParticipant.STATUS.completed)
+            .order_by("id", "answers__answer__id")
+            .values(
+                "email",
+                "score",
+                "answers__answer__correct",
+                "answers__answer__answer",
+                "answers__answer__id",
+                "answers__answer__question__question",
+            )
+        )
+
+        def map_to_context(
+            participant_data: Tuple[str, Iterable[Dict[str, Any]]]
+        ) -> Dict[str, Any]:
+            assert participant_data
+            email, answers = participant_data
+            answers = list(answers)
+            context_ = {
+                "email": email,
+                "answers": [
+                    {
+                        "question": answer[
+                            "answers__answer__question__question"
+                        ],
+                        "answer": answer["answers__answer__answer"],
+                        "correct": answer["answers__answer__correct"],
+                    }
+                    for answer in answers
+                ],
+                "score": answers[0]["score"],
+            }
+            context_.update(common_context)
+            return context_
+
+        return map(
+            map_to_context, groupby(participants, key=itemgetter("email"))
+        )
 
 
 class QuizInvitation(AbstractBaseInvitation):
@@ -236,9 +285,11 @@ class QuizParticipant(TimestampedModel):
     @property
     def _score(self) -> int:
         return (
-            self.answers.prefetch_related("answer")
+            self.answers.prefetch_related("answer", "answer__question")
             .filter(answer__correct=True)
-            .count()
+            .aggregate(Sum("answer__question__score"))[
+                "answer__question__score__sum"
+            ]
         )
 
     @property

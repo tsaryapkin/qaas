@@ -1,3 +1,4 @@
+import importlib
 import random
 import string
 from typing import Iterable, List
@@ -18,3 +19,11 @@ def compact(iterable: Iterable) -> List:
 
 def percentage(part, whole) -> str:
     return f"{100 * float(part) / float(whole)}%"
+
+
+def import_attribute(path):
+    """import by fully-qualified name"""
+    assert isinstance(path, str)
+    pkg, attr = path.rsplit(".", 1)
+    ret = getattr(importlib.import_module(pkg), attr)
+    return ret

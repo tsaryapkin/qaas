@@ -9,7 +9,7 @@ isort
 pre-commit
 djangorestframework-jwt
 django-ordered-model
-django-rest-swagger
+drf-yasg
 python-jose
 cryptography
 pytest-django
@@ -21,3 +21,5 @@ Redis
 django-invitations
 django-annoying
 django-taggit
+pytest-mock
+django-celery-email

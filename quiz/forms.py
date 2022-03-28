@@ -56,3 +56,39 @@ class QuizInvitationAdminAddForm(CleanInvitationMixin, forms.ModelForm):
     class Meta:
         model = QuizInvitation
         fields = ("email", "inviter", "quiz")
+
+
+class QuizAdminForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        exclude = "created", "modified", "published_at"
+
+
+class AnswerInlineFormset(forms.BaseInlineFormSet):
+    model = Answer
+
+    def clean(self):
+        super().clean()
+        correct_cnt = 0
+        to_delete = 0
+        for form in self.forms:
+            if form.cleaned_data.get("correct"):
+                correct_cnt += 1
+            if form.cleaned_data.get("DELETE"):
+                to_delete += 1
+        if correct_cnt == 0:
+            raise ValidationError(
+                [{NON_FIELD_ERRORS: "Correct answer is not specified"}]
+            )
+        if correct_cnt > 1:
+            raise ValidationError(
+                [
+                    {
+                        NON_FIELD_ERRORS: "More than one correct answer is specified"
+                    }
+                ]
+            )
+        if len(self.forms) - to_delete < 2:
+            raise ValidationError(
+                [{NON_FIELD_ERRORS: "Min 2 answers should be specified"}]
+            )

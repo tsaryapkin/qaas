@@ -55,3 +55,13 @@ class QuizParticipantFactory(factory.django.DjangoModelFactory):
 
     quiz = factory.SubFactory(QuizFactory)
     user = factory.SubFactory(UserFactory)
+
+
+class QuizInvitationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = "quiz.QuizInvitation"
+
+    quiz = factory.SubFactory(QuizFactory)
+    email = factory.Faker("email")
+
+    key = factory.Faker("word")

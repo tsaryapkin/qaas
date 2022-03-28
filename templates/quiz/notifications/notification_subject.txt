@@ -1,0 +1,4 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}Quiz "{{ quiz_title }}" results{% endblocktrans %}
+{% endautoescape %}

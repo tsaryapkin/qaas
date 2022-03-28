@@ -1,7 +1,10 @@
 import pytest
+from faker import Faker
 
 from quiz.models import *
 from tests.factories import QuizFactory, QuizParticipantFactory, UserFactory
+
+fake = Faker()
 
 pytestmark = pytest.mark.django_db
 

@@ -102,7 +102,7 @@ class Quiz(TimestampedModel):
         )
 
     def get_absolute_url(self):
-        return reverse("quizzes", kwargs={"slug": self.slug})
+        return reverse("quizzes-detail", kwargs={"slug": self.slug})
 
     @property
     def max_score(self) -> int:
@@ -164,14 +164,14 @@ class QuizInvitation(AbstractBaseInvitation):
     def __str__(self):
         return f"Quiz invite: {self.email}"
 
-    def create_participant(self, request) -> "QuizParticipant":
+    def accept(self, request) -> None:
         """Creates participant record from invitation"""
         user = request.user if request.user.is_authenticated else None
         with transaction.atomic():
             self.accepted = True
             self.save()
             try:
-                return QuizParticipant.objects.create(
+                QuizParticipant.objects.create(
                     user=user, key=self.key, email=self.email, quiz=self.quiz
                 )
             except IntegrityError:  # attempt to create participant with existing combination of email and quiz
@@ -198,6 +198,8 @@ class QuizParticipant(TimestampedModel):
         verbose_name="participants",
     )
     status = StatusField(default=STATUS.accepted, verbose_name="status")
+    score = models.PositiveIntegerField(null=True)
+
     key = models.CharField(max_length=100, null=False)
     completed_at = MonitorField(monitor="status", when=["completed"], null=True)
 
@@ -232,7 +234,7 @@ class QuizParticipant(TimestampedModel):
         ).prefetch_related("answers")
 
     @property
-    def score(self) -> int:
+    def _score(self) -> int:
         return (
             self.answers.prefetch_related("answer")
             .filter(answer__correct=True)
@@ -241,7 +243,7 @@ class QuizParticipant(TimestampedModel):
 
     @property
     def score_str(self) -> str:
-        return f"{self.score} out of {self.quiz.max_score}"
+        return f"{self.score or self._score} out of {self.quiz.max_score}"
 
     def __str__(self) -> str:
         return f"Participant {self.email} - quiz {self.quiz.title}"

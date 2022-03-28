@@ -14,7 +14,6 @@ from .models import *
 __all__ = [
     "QuizMakerListSerializer",
     "QuizMakerSerializer",
-    "InviteeListSerializer",
     "ParticipantSerializer",
     "QuestionSerializer",
     "AnswerSerializer",
@@ -120,12 +119,6 @@ class QuizMakerListSerializer(TaggitSerializer, serializers.ModelSerializer):
         exclude = ("author",)
 
 
-class InviteeListSerializer(serializers.Serializer):
-    invitees = serializers.ListField(
-        child=serializers.EmailField(), max_length=100
-    )
-
-
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizParticipant
@@ -135,7 +128,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class InviteeSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizInvitation
-        exclude = "email", "created_at", "quiz"
+        exclude = "email", "created", "quiz"
 
 
 class TakeAnswerSerializer(serializers.ModelSerializer):

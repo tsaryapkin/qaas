@@ -1,0 +1,8 @@
+{% load i18n %}
+{% autoescape off %}
+{% blocktrans %}
+Thank you for taking part in the quiz "{{ quiz_title }}",
+
+You score is {{ participant_score }}
+{% endblocktrans %}
+{% endautoescape %}

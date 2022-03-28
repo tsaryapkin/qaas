@@ -42,12 +42,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django.contrib.sites",
-    "rest_framework_swagger",
+    "drf_yasg",
     "taggit",
     "django_extensions",
     "users",
     "quiz",
     "invitations",
+    "djcelery_email",
 ]
 
 MIDDLEWARE = [
@@ -149,7 +150,8 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 50,
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
 EMAIL_HOST = "0.0.0.0"
 EMAIL_PORT = 1025
 
@@ -163,3 +165,9 @@ INVITATIONS_ADMIN_ADD_FORM = "quiz.forms.QuizInvitationAdminAddForm"
 
 MAX_QUESTIONS_PER_QUIZ = env.int("MAX_QUESTIONS_PER_QUIZ", 50)
 MAX_ANSWERS_PER_QUESTION = env.int("MAX_ANSWERS_PER_QUESTION", 10)
+
+
+CELERY_EMAIL_TASK_CONFIG = {
+    "name": "djcelery_email_send",
+    "ignore_result": False,
+}

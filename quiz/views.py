@@ -1,15 +1,15 @@
 from typing import Any, Dict, Optional
 
 from annoying.functions import get_object_or_None
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.models import QuerySet
-from django.http import HttpResponseRedirect
 from invitations.exceptions import AlreadyAccepted, AlreadyInvited
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import APIException
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from rest_framework.viewsets import GenericViewSet
 
 from .filters import QuizFilter
@@ -69,7 +69,6 @@ class QuizMakerViewSet(
     serializer_class = QuizMakerSerializer
     serializer_action_classes = {
         "list": QuizMakerListSerializer,
-        "invite": InviteeListSerializer,
         "invitees": InviteeSerializer,
         "participants": ParticipantSerializer,
     }
@@ -86,16 +85,17 @@ class QuizMakerViewSet(
     @action(detail=True, methods=["post"])
     def invite(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
-        invitees = InviteeListSerializer(self.request.data)
-
         status_code = 400
         response = {"valid": [], "invalid": []}
-        for invitee in invitees.data["invitees"]:
+        for invitee in request.data:
             try:
+                validate_email(invitee)
                 CleanInvitationMixin().validate_invitation(invitee, quiz)
                 invite = QuizInvitation.create(
                     invitee, quiz=quiz, inviter=request.user
                 )
+            except ValidationError:
+                response["invalid"].append({invitee: "invalid email"})
             except AlreadyAccepted:
                 response["invalid"].append({invitee: "already accepted"})
             except AlreadyInvited:
@@ -235,7 +235,7 @@ class QuizViewSet(
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def accept_invitation(request, key):
+def accept_invitation(request, key) -> Response:
     """
     :param request
     :param key: token from invitation
@@ -245,11 +245,10 @@ def accept_invitation(request, key):
     invitation: Optional[QuizInvitation] = get_object_or_None(
         QuizInvitation, key=key
     )
-    if not invitation or (
-        invitation and (invitation.accepted or invitation.key_expired())
-    ):
-        raise APIException(code=410, detail="Invitation not available")
-    invitation.create_participant(request)
-    return HttpResponseRedirect(
-        f"{reverse('quizzes-detail', kwargs={'slug': invitation.quiz.slug})}?token={key}"
+    if not invitation or invitation.key_expired():
+        return Response(status=410, exception=True)
+    if not invitation.accepted:
+        invitation.accept(request)
+    return Response(
+        data={"quiz": f"{invitation.quiz.get_absolute_url()}?token={key}"}
     )

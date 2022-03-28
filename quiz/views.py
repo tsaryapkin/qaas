@@ -14,6 +14,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from .filters import QuizFilter
 from .forms import CleanInvitationMixin
+from .jobs import notify_participants
 from .models import *
 from .serializers import *
 
@@ -85,7 +86,7 @@ class QuizMakerViewSet(
     @action(detail=True, methods=["post"])
     def invite(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
-        status_code = 400
+        status_code = status.HTTP_400_BAD_REQUEST
         response = {"valid": [], "invalid": []}
         for invitee in request.data:
             try:
@@ -105,7 +106,7 @@ class QuizMakerViewSet(
                 response["valid"].append({invitee: "invited"})
 
         if response["valid"]:
-            status_code = 201
+            status_code = status.HTTP_201_CREATED
 
         return Response(data=response, status=status_code)
 
@@ -113,6 +114,12 @@ class QuizMakerViewSet(
     def invitees(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
         return self._paginated_response(quiz.invitations.all())
+
+    @action(detail=True, methods=["post"])
+    def notify(self, request, *args, **kwargs) -> Response:
+        quiz = self.get_object()
+        notify_participants.delay(quiz.id)
+        return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["get"])
     def participants(self, request, *args, **kwargs) -> Response:
@@ -128,9 +135,10 @@ class QuizMakerViewSet(
 
     @action(detail=True, methods=["post"])
     def notify_participants(self, request, *args, **kwargs):
+        """Participants who completed the quiz get notified via email"""
         quiz = self.get_object()
         quiz.notify_participants()
-        return Response(status=200)
+        return Response(status=status.HTTP_200_OK)
 
 
 class QuestionViewSet(
@@ -161,7 +169,6 @@ class QuizViewSet(
     ActionBasedSerializerMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     GenericViewSet,
 ):
     """
@@ -171,7 +178,6 @@ class QuizViewSet(
     serializer_class = TakeQuizSerializer
     permission_classes = [AllowAny]
     queryset = Quiz.objects.all()
-    lookup_field = "slug"
     token_header = "Quiz-token"
 
     serializer_action_classes = {
@@ -208,7 +214,8 @@ class QuizViewSet(
             )
         if participant.status == QuizParticipant.STATUS.completed:
             raise APIException(
-                detail="You have already completed this quiz", code=400
+                detail="You have already completed this quiz",
+                code=status.HTTP_400_BAD_REQUEST,
             )
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

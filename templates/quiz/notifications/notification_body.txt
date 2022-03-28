@@ -3,6 +3,9 @@
 {% blocktrans %}
 Thank you for taking part in the quiz "{{ quiz_title }}",
 
-You score is {{ participant_score }}
+You score is {{ score }} out of {{ max_score }}
 {% endblocktrans %}
+{% for a in answers %}
+- Question "{{ a.question }}": your answer "{{ a.answer }}" is {{ a.correct|yesno:"right,wrong,wrong" }}
+{% endfor %}
 {% endautoescape %}

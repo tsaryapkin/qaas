@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from annoying.functions import get_object_or_None
 from django.conf import settings
 from django.core import mail
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -7,8 +8,6 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 
 from qaas.celery import app
-from annoying.functions import get_object_or_None
-
 from quiz.models import Quiz
 
 
@@ -46,7 +45,10 @@ def render_notification(
 def notify_participants(quiz_id: int) -> None:
     quiz = get_object_or_None(Quiz, id=quiz_id)
     quiz_summary = quiz.summary()
-    messages = [render_notification(participant["email"], participant) for participant in quiz_summary]
+    messages = [
+        render_notification(participant["email"], participant)
+        for participant in quiz_summary
+    ]
     with mail.get_connection():
         for msg in messages:
             msg.send()

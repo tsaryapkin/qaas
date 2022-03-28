@@ -2,8 +2,8 @@ import datetime
 import logging
 from functools import reduce
 from itertools import groupby
-from operator import or_, itemgetter
-from typing import Optional, Dict, Any, Tuple, Iterable
+from operator import itemgetter, or_
+from typing import Any, Dict, Iterable, Iterator, Optional, Tuple
 
 from django.db import IntegrityError, models, transaction
 from django.db.models import Prefetch, Q, QuerySet, Subquery, Sum
@@ -103,7 +103,7 @@ class Quiz(TimestampedModel):
         )
 
     def get_absolute_url(self):
-        return reverse("quizzes-detail", kwargs={"slug": self.slug})
+        return reverse("quizzes-detail", args=[self.id])
 
     @property
     def max_score(self) -> int:
@@ -132,7 +132,7 @@ class Quiz(TimestampedModel):
         )
 
         def map_to_context(
-            participant_data: Tuple[str, Iterable[Dict[str, Any]]]
+            participant_data: Tuple[str, Iterator]
         ) -> Dict[str, Any]:
             assert participant_data
             email, answers = participant_data

@@ -6,5 +6,5 @@ class QuizConfig(AppConfig):
     name = "quiz"
 
     def ready(self):
-        from . import signals  # noqa
         from . import jobs  # noqa
+        from . import signals  # noqa

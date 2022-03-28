@@ -15,7 +15,7 @@ pytestmark = pytest.mark.django_db
 def test_fail_to_create_quiz_too_many_questions(client, user):
     client.force_login(user)
     response = client.post(
-        "/api/quizmaker/quizzes/",
+        reverse("quizmaker-list"),
         data=json.dumps(
             {
                 "title": fake.sentence(),
@@ -40,7 +40,7 @@ def test_fail_to_create_quiz_too_many_questions(client, user):
 def test_fail_to_create_quiz_too_many_answers(client, user):
     client.force_login(user)
     response = client.post(
-        "/api/quizmaker/quizzes/",
+        reverse("quizmaker-list"),
         data=json.dumps(
             {
                 "title": fake.sentence(),
@@ -69,7 +69,7 @@ def test_fail_to_create_quiz_too_many_answers(client, user):
 def test_fail_to_create_quiz_multiple_right_answers(client, user):
     client.force_login(user)
     response = client.post(
-        "/api/quizmaker/quizzes/",
+        reverse("quizmaker-list"),
         data=json.dumps(
             {
                 "title": fake.sentence(),
@@ -96,7 +96,7 @@ def test_fail_to_create_quiz_multiple_right_answers(client, user):
 def test_fail_to_create_quiz_no_right_answers(client, user):
     client.force_login(user)
     response = client.post(
-        "/api/quizmaker/quizzes/",
+        reverse("quizmaker-list"),
         data=json.dumps(
             {
                 "title": fake.sentence(),
@@ -123,7 +123,7 @@ def test_fail_to_create_quiz_no_right_answers(client, user):
 def test_create_correct(client, user):
     client.force_login(user)
     response = client.post(
-        "/api/quizmaker/quizzes/",
+        reverse("quizmaker-list"),
         data=json.dumps(
             {
                 "title": fake.sentence(),
@@ -151,7 +151,7 @@ def test_participant_cannot_answer_same_question_twice(client, quiz):
         "question": question.id,
         "answer": question.answers.first().id,
     }
-    url = f"/api/quizzes/{quiz.slug}/answer/"
+    url = reverse("quizzes-answer", args=[quiz.id])
     response = client.post(url, request_data)
     assert response.status_code == 201
     response = client.post(url, request_data)
@@ -161,7 +161,7 @@ def test_participant_cannot_answer_same_question_twice(client, quiz):
 def test_invitation_is_not_sent_twice(client, user):
     quiz = QuizFactory(questions=[], author=user)
     client.force_login(user)
-    url = f"/api/quizmaker/quizzes/{quiz.id}/invite/"
+    url = reverse("quizmaker-invite", args=[quiz.id])
     email = fake.email()
     response = client.post(
         url,

@@ -14,3 +14,7 @@ def compact(iterable: Iterable) -> List:
     :returns new collection without False values
     """
     return [x for x in iterable if x]
+
+
+def percentage(part, whole) -> str:
+    return f"{100 * float(part) / float(whole)}%"

@@ -4,7 +4,7 @@ from functools import reduce
 from operator import or_
 from typing import Optional
 
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.models import Prefetch, Q, QuerySet, Subquery, Sum
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -19,7 +19,7 @@ from rest_framework.reverse import reverse
 from taggit.managers import TaggableManager
 
 from core.models import TimestampedModel
-from core.utils import compact
+from core.utils import compact, percentage
 from users.models import User
 
 from .exceptions import QuizException
@@ -89,7 +89,7 @@ class Quiz(TimestampedModel):
     ) -> QuerySet["Quiz"]:
         """Returns queryset of quizzes related to user-participant or quizParticipant when user is anonymous"""
         if not (user.is_authenticated or participant):
-            # if user is not authenticated and participant is not provided, there's nothing to return
+            # if user is not authenticated and participant is not provided via token, there's nothing to return
             return Quiz.objects.none()
         criteria = [
             Q(participants__user=user) if user.is_authenticated else None,
@@ -170,9 +170,14 @@ class QuizInvitation(AbstractBaseInvitation):
         with transaction.atomic():
             self.accepted = True
             self.save()
-            return QuizParticipant.objects.create(
-                user=user, key=self.key, email=self.email, quiz=self.quiz
-            )
+            try:
+                return QuizParticipant.objects.create(
+                    user=user, key=self.key, email=self.email, quiz=self.quiz
+                )
+            except IntegrityError:  # attempt to create participant with existing combination of email and quiz
+                raise QuizException(
+                    detail="Participant with this email is already taking part in this quiz"
+                )
 
 
 class QuizParticipant(TimestampedModel):
@@ -211,7 +216,11 @@ class QuizParticipant(TimestampedModel):
 
     @property
     def progress(self) -> str:
-        return f"{self.answered_questions_count} out of {self.total_questions_count}"
+        if self.status == self.STATUS.completed:
+            return "100%"
+        return percentage(
+            self.answered_questions_count, self.total_questions_count
+        )
 
     @property
     def remaining_questions(self) -> QuerySet["Question"]:

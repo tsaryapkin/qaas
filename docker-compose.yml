@@ -1,0 +1,16 @@
+version: '3'
+services:
+  smtp-server:
+    image: mailhog/mailhog
+    expose:
+      - 1025
+      - 8025
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379

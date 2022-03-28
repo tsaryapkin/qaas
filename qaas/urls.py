@@ -1,7 +1,6 @@
 """qaas URL Configuration
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.0/topics/http/urls/
+
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,8 +13,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_swagger.views import get_swagger_view
+
+schema_view = get_swagger_view(title="QaaS API")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
+    path("api/token-auth", obtain_jwt_token),
+    path("api/docs", schema_view),
+    path("api/", include("quiz.urls")),
 ]

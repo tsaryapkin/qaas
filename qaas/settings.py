@@ -9,24 +9,27 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+from typing import List
+
+import environ
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+environ.Env.read_env(Path(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-pez*--cj^sglzgrlx=m(fc*7py0$1@t*4c^-3er9frwc)3q1@8"
-)
+SECRET_KEY = env.str("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS: List[str] = env.list("ALLOWED_HOSTS", default=[""])
 
 # Application definition
 
@@ -37,6 +40,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "django.contrib.sites",
+    "rest_framework_swagger",
+    "taggit",
+    "django_extensions",
+    "users",
+    "quiz",
+    "invitations",
 ]
 
 MIDDLEWARE = [
@@ -63,15 +74,16 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            "libraries": {
+                "staticfiles": "django.templatetags.static",
+            },
         },
     },
 ]
 
 WSGI_APPLICATION = "qaas.wsgi.application"
 
-
 # Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
     "default": {
@@ -80,9 +92,7 @@ DATABASES = {
     }
 }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -99,6 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "users.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -111,7 +122,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -121,3 +131,35 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 50,
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "0.0.0.0"
+EMAIL_PORT = 1025
+
+CELERY_BROKER_URL = "redis://0.0.0.0:6379"
+CELERY_RESULT_BACKEND = "redis://0.0.0.0:6379"
+
+SITE_ID = 1
+
+INVITATIONS_INVITATION_MODEL = "quiz.QuizInvitation"
+INVITATIONS_ADMIN_ADD_FORM = "quiz.forms.QuizInvitationAdminAddForm"
+
+MAX_QUESTIONS_PER_QUIZ = env.int("MAX_QUESTIONS_PER_QUIZ", 50)
+MAX_ANSWERS_PER_QUESTION = env.int("MAX_ANSWERS_PER_QUESTION", 10)

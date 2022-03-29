@@ -1,24 +1,38 @@
 from django.contrib import admin, messages
 from django.contrib.admin import display
 from invitations.admin import InvitationAdmin
+from nested_admin.nested import (
+    NestedModelAdmin,
+    NestedStackedInline,
+    NestedTabularInline,
+)
 
-from .forms import AnswerInlineFormset, QuizAdminForm
+from .forms import AnswerInlineFormset, QuestionInlineFormset, QuizAdminForm
 from .models import *
 
 
-class AnswerInline(admin.StackedInline):
+class AnswerInline(NestedTabularInline):
     formset = AnswerInlineFormset
     model = Answer
     extra = 0
     min_num = 2
 
 
+class QuestionInline(NestedStackedInline):
+    formset = QuestionInlineFormset
+    model = Question
+    inlines = [AnswerInline]
+    extra = 0
+    min_num = 1
+
+
 @admin.register(Quiz)
-class QuizAdmin(admin.ModelAdmin):
+class QuizAdmin(NestedModelAdmin):
     list_display = ("author", "title", "slug", "created_at")
     list_filter = ("author",)
     search_fields = ("author__username", "title", "description")
     form = QuizAdminForm
+    inlines = [QuestionInline]
 
     def has_add_permission(self, request, obj=None):
         return False

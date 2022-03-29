@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django.contrib.sites",
     "drf_yasg",
+    "nested_admin",
     "taggit",
     "django_extensions",
     "users",

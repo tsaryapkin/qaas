@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.forms import inlineformset_factory
 from invitations.adapters import get_invitations_adapter
 from invitations.exceptions import AlreadyAccepted, AlreadyInvited
 
@@ -62,6 +63,23 @@ class QuizAdminForm(forms.ModelForm):
         exclude = "created", "modified", "published_at"
 
 
+class QuestionInlineFormset(forms.BaseInlineFormSet):
+    model = Question
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        question_field = forms.CharField(widget=forms.TextInput())
+        question_field.widget.attrs["size"] = 150
+        form.fields["question"] = question_field
+
+    def clean(self):
+        super().clean()
+        if not [form for form in self.forms if not form.cleaned_data.get("DELETE")]:
+            raise ValidationError(
+                [{NON_FIELD_ERRORS: "Min 1 question should be specified"}]
+            )
+
+
 class AnswerInlineFormset(forms.BaseInlineFormSet):
     model = Answer
 
@@ -82,7 +100,15 @@ class AnswerInlineFormset(forms.BaseInlineFormSet):
             raise ValidationError(
                 [{NON_FIELD_ERRORS: "More than one correct answer is specified"}]
             )
-        if len(self.forms) - to_delete < 2:
+        if len(self.forms) - to_delete < 2 and not self.parent_form.cleaned_data.get(
+            "DELETE"
+        ):
+            #  if question is not deleted there needs to be at least two answers
             raise ValidationError(
                 [{NON_FIELD_ERRORS: "Min 2 answers should be specified"}]
             )
+
+
+QuestionAnswerFormset = inlineformset_factory(
+    Question, Answer, fields=("answer", "correct"), extra=1
+)

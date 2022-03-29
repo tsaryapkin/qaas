@@ -18,5 +18,5 @@ urlpatterns += [
         accept_invitation,
         name="accept-invite",
     ),
-    path("report/", daily_report, name="daily-report"),
+    path("report", daily_report, name="daily-report"),
 ]

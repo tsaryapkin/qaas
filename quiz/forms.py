@@ -12,15 +12,13 @@ class CleanInvitationMixin(object):
             email__iexact=email, quiz=quiz, accepted=False
         ):
             raise AlreadyInvited
-        if QuizInvitation.objects.filter(
-            email__iexact=email, quiz=quiz, accepted=True
-        ):
+        if QuizInvitation.objects.filter(email__iexact=email, quiz=quiz, accepted=True):
             raise AlreadyAccepted
         else:
             return True
 
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super().clean()  # type: ignore
         email = cleaned_data["email"]
         email = get_invitations_adapter().clean_email(email)
         errors = {
@@ -82,11 +80,7 @@ class AnswerInlineFormset(forms.BaseInlineFormSet):
             )
         if correct_cnt > 1:
             raise ValidationError(
-                [
-                    {
-                        NON_FIELD_ERRORS: "More than one correct answer is specified"
-                    }
-                ]
+                [{NON_FIELD_ERRORS: "More than one correct answer is specified"}]
             )
         if len(self.forms) - to_delete < 2:
             raise ValidationError(

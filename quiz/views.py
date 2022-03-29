@@ -1,6 +1,5 @@
 import csv
 import datetime
-import json
 from typing import Any, Dict, Optional
 
 from annoying.functions import get_object_or_None
@@ -24,7 +23,7 @@ from .filters import QuizFilter
 from .forms import CleanInvitationMixin
 from .jobs import notify_participants
 from .models import *
-from .report import DailyReport, get_daily_report
+from .report import get_daily_report
 from .serializers import *
 
 __all__ = [
@@ -101,16 +100,14 @@ class QuizMakerViewSet(
         if len(request.data) > settings.MAX_INVITEES_PER_REQUEST:
             raise APIException(
                 code=status_code,
-                detail=f"The number of invitees exceed the limit: {settings.MAX_INVITEES_PER_REQUEST} ",
+                detail=f"The number of invitees exceeds the limit: {settings.MAX_INVITEES_PER_REQUEST}",
             )
         response = {"valid": [], "invalid": []}
         for invitee in request.data:
             try:
                 validate_email(invitee)
                 CleanInvitationMixin().validate_invitation(invitee, quiz)
-                invite = QuizInvitation.create(
-                    invitee, quiz=quiz, inviter=request.user
-                )
+                invite = QuizInvitation.create(invitee, quiz=quiz, inviter=request.user)
             except ValidationError:
                 response["invalid"].append({invitee: "invalid email"})
             except AlreadyAccepted:
@@ -133,6 +130,7 @@ class QuizMakerViewSet(
 
     @action(detail=True, methods=["post"])
     def notify(self, request, *args, **kwargs) -> Response:
+        """Send notifications with results to those who completed the quiz"""
         quiz = self.get_object()
         notify_participants.delay(quiz.id)
         return Response(status=status.HTTP_200_OK)
@@ -151,16 +149,7 @@ class QuizMakerViewSet(
     @action(detail=True, methods=["get"])
     def questions(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
-        return Response(
-            QuestionSerializer(quiz.questions.all(), many=True).data
-        )
-
-    @action(detail=True, methods=["post"])
-    def notify_participants(self, request, *args, **kwargs):
-        """Participants who completed the quiz get notified via email"""
-        quiz = self.get_object()
-        quiz.notify_participants()
-        return Response(status=status.HTTP_200_OK)
+        return Response(QuestionSerializer(quiz.questions.all(), many=True).data)
 
 
 class QuestionViewSet(
@@ -171,9 +160,9 @@ class QuestionViewSet(
     serializer_class = QuestionSerializer
 
     def get_queryset(self) -> QuerySet[Quiz]:
-        return Question.objects.filter(
-            quiz__author=self.request.user
-        ).prefetch_related("answers")
+        return Question.objects.filter(quiz__author=self.request.user).prefetch_related(
+            "answers"
+        )
 
 
 class AnswerViewSet(
@@ -194,7 +183,7 @@ class QuizViewSet(
     GenericViewSet,
 ):
     """
-    Quizzes from participant's perspective
+    Quizzes from participant's perspective - taking part, browsing, tracking progress etc
     """
 
     serializer_class = TakeQuizSerializer
@@ -209,9 +198,7 @@ class QuizViewSet(
     }
 
     def get_queryset(self):
-        return Quiz.for_user_or_participant(
-            self.request.user, self.request.participant
-        )
+        return Quiz.for_user_or_participant(self.request.user, self.request.participant)
 
     @classmethod
     def get_token(cls, request) -> Optional[str]:
@@ -270,30 +257,24 @@ def accept_invitation(request, key) -> Response:
     :return: Response - redirect to the quiz that the invite was about
     Creates participant
     """
-    invitation: Optional[QuizInvitation] = get_object_or_None(
-        QuizInvitation, key=key
-    )
+    invitation: Optional[QuizInvitation] = get_object_or_None(QuizInvitation, key=key)
     if not invitation or invitation.key_expired():
         return Response(status=410, exception=True)
     if not invitation.accepted:
         invitation.accept(request)
-    return Response(
-        data={"quiz": f"{invitation.quiz.get_absolute_url()}?token={key}"}
-    )
+    return Response(data={"quiz": f"{invitation.quiz.get_absolute_url()}?token={key}"})
 
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def daily_report(request: Request) -> HttpResponse:
     """
-    daily report about the service usage
+    Daily report about the usage of the service
     """
     known_formats = {"json": "application/json", "csv": "text/csv"}
-    format_ = request.query_params.get("format", "csv")
+    format_ = request.query_params.get("output_format", "csv")
     if format_ not in known_formats:
-        return HttpResponse(
-            "Format is not specified", status=status.HTTP_400_BAD_REQUEST
-        )
+        return HttpResponse("Unknown format", status=status.HTTP_400_BAD_REQUEST)
     response_kwargs = {
         "content_type": known_formats[format_],
         "headers": {

@@ -11,7 +11,7 @@ from qaas.celery import app
 from quiz.models import Quiz
 
 
-def render_notification(
+def _render_notification(
     email: str,
     context: Dict[str, Any],
     template_prefix: str = "quiz/notifications/notification",
@@ -46,7 +46,7 @@ def notify_participants(quiz_id: int) -> None:
     quiz = get_object_or_None(Quiz, id=quiz_id)
     quiz_summary = quiz.summary()
     messages = [
-        render_notification(participant["email"], participant)
+        _render_notification(participant["email"], participant)
         for participant in quiz_summary
     ]
     with mail.get_connection():

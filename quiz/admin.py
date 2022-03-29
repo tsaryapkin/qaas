@@ -39,9 +39,7 @@ class QuestionAdmin(admin.ModelAdmin):
         if obj.quiz.question_cnt == 1:
             storage = messages.get_messages(request)
             storage.used = True
-            messages.error(
-                request, "Cannot delete last record. Delete quiz instead"
-            )
+            messages.error(request, "Cannot delete last record. Delete quiz instead")
         else:
             obj.delete()
 

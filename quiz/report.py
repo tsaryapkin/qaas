@@ -45,9 +45,7 @@ class DailyReport:
         result.extend([astuple(q) for q in self.quizzes])
         result.append([])
         result.append(["Participants"])
-        result.append(
-            ["E-mail", "Quiz", "Status", "Score", "Answers given", "Created"]
-        )
+        result.append(["E-mail", "Quiz", "Status", "Score", "Answers given", "Created"])
         result.extend([astuple(p) for p in self.participants])
         return result
 

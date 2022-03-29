@@ -6,7 +6,7 @@ from .models import *
 
 
 @receiver(post_save, sender=ParticipantAnswer)
-def on_participant_answer_saved(sender, instance: ParticipantAnswer, **kwargs):
+def on_participant_answer_saved(sender, instance: ParticipantAnswer, **kwargs) -> None:
     participant = instance.participant
     total_question_cnt = participant.quiz.question_cnt
     answered_so_far = participant.answered_questions_count
@@ -19,8 +19,9 @@ def on_participant_answer_saved(sender, instance: ParticipantAnswer, **kwargs):
 
 
 @receiver(pre_save, sender=Quiz)
-def on_quiz_pre_save(sender, instance: Quiz, **kwargs):
+def on_quiz_pre_save(sender, instance: Quiz, **kwargs) -> None:
     if instance._state.adding:
+        #  making sure that quiz has unique slug
         if not instance.slug:
             instance.slug = slugify(instance.title)
         if Quiz.objects.filter(slug=instance.slug).exists():

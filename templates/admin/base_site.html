@@ -1,0 +1,8 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ _('QaaS site admin') }}{% endblock %}
+
+{% block branding %}
+     <h1 id="site-name"><a href="{% url 'admin:index' %}">{{ _('QaaS administration') }}</a></h1>
+{% endblock %}
+{% block nav-global %}{% endblock %}

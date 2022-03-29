@@ -52,7 +52,7 @@ class TodayRecordsMixin:
     def get_today_records(cls):
         assert hasattr(cls, "created_at")
         today = datetime.datetime.today()
-        return cls.objects.filter(created_at__date=today)
+        return cls.objects.filter(created_at__date=today)  # type: ignore
 
 
 class Quiz(TodayRecordsMixin, TimestampedModel):
@@ -74,9 +74,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
     description = models.TextField(
         max_length=1000, null=True, blank=True, verbose_name="description"
     )
-    slug = models.SlugField(
-        null=False, blank=True, unique=True, verbose_name="slug"
-    )
+    slug = models.SlugField(null=False, blank=True, unique=True, verbose_name="slug")
     tags = TaggableManager()
 
     objects = DeepQuizQueryset.as_manager()
@@ -163,9 +161,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
             )
         )
 
-        def map_to_context(
-            participant_data: Tuple[str, Iterator]
-        ) -> Dict[str, Any]:
+        def map_to_context(participant_data: Tuple[str, Iterator]) -> Dict[str, Any]:
             assert participant_data
             email, answers = participant_data
             answers = list(answers)
@@ -173,9 +169,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
                 "email": email,
                 "answers": [
                     {
-                        "question": answer[
-                            "answers__answer__question__question"
-                        ],
+                        "question": answer["answers__answer__question__question"],
                         "answer": answer["answers__answer__answer"],
                         "correct": answer["answers__answer__correct"],
                     }
@@ -186,9 +180,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
             context_.update(common_context)
             return context_
 
-        return map(
-            map_to_context, groupby(participants, key=itemgetter("email"))
-        )
+        return map(map_to_context, groupby(participants, key=itemgetter("email")))  # type: ignore
 
 
 class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
@@ -199,9 +191,7 @@ class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
         verbose_name="quiz",
     )
     email = models.EmailField(verbose_name="e-mail address")
-    created_at = models.DateTimeField(
-        verbose_name="created", default=timezone.now
-    )
+    created_at = models.DateTimeField(verbose_name="created", default=timezone.now)
 
     class Meta:
         unique_together = "quiz", "email"
@@ -303,9 +293,7 @@ class QuizParticipant(TodayRecordsMixin, TimestampedModel):
     def progress(self) -> str:
         if self.status == self.STATUS.completed:
             return "100%"
-        return percentage(
-            self.answered_questions_count, self.total_questions_count
-        )
+        return percentage(self.answered_questions_count, self.total_questions_count)
 
     @property
     def remaining_questions(self) -> QuerySet["Question"]:
@@ -321,9 +309,7 @@ class QuizParticipant(TodayRecordsMixin, TimestampedModel):
         return (
             self.answers.prefetch_related("answer", "answer__question")
             .filter(answer__correct=True)
-            .aggregate(Sum("answer__question__score"))[
-                "answer__question__score__sum"
-            ]
+            .aggregate(Sum("answer__question__score"))["answer__question__score__sum"]
         )
 
     @property

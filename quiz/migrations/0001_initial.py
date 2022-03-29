@@ -65,9 +65,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "score",
-                    models.PositiveIntegerField(
-                        default=1, verbose_name="score"
-                    ),
+                    models.PositiveIntegerField(default=1, verbose_name="score"),
                 ),
             ],
             options={
@@ -92,9 +90,7 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "title",
-                    models.CharField(
-                        max_length=255, unique=True, verbose_name="title"
-                    ),
+                    models.CharField(max_length=255, unique=True, verbose_name="title"),
                 ),
                 (
                     "description",
@@ -130,16 +126,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "key",
-                    models.CharField(
-                        max_length=64, unique=True, verbose_name="key"
-                    ),
+                    models.CharField(max_length=64, unique=True, verbose_name="key"),
                 ),
                 ("sent", models.DateTimeField(null=True, verbose_name="sent")),
                 (
                     "email",
-                    models.EmailField(
-                        max_length=254, verbose_name="e-mail address"
-                    ),
+                    models.EmailField(max_length=254, verbose_name="e-mail address"),
                 ),
                 (
                     "created",

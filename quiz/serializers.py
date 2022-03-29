@@ -57,14 +57,10 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = "id", "answers", "score", "question"
 
-    def validate_answers(
-        self, value: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
-        correct_ans_cnt = len([a for a in value if a["correct"]])
+    def validate_answers(self, value: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        correct_ans_cnt = len([a for a in value if a.get("correct", False)])
         if correct_ans_cnt == 0:
-            raise ValidationError(
-                {"answers": "Correct answer is not specified"}
-            )
+            raise ValidationError({"answers": "Correct answer is not specified"})
         if correct_ans_cnt > 1:
             raise ValidationError(
                 {"answers": "More than one correct answer is specified"}
@@ -72,9 +68,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return value
 
 
-class QuestionListField(
-    RelatedManagerRepresentationMixin, serializers.ListField
-):
+class QuestionListField(RelatedManagerRepresentationMixin, serializers.ListField):
     child = QuestionSerializer()
 
 
@@ -89,9 +83,7 @@ class QuizMakerSerializer(TaggitSerializer, serializers.ModelSerializer):
         fields = "id", "title", "description", "questions", "tags"
 
     @classmethod
-    def save_questions(
-        cls, questions: List[Dict[str, Any]], quiz: Quiz
-    ) -> None:
+    def save_questions(cls, questions: List[Dict[str, Any]], quiz: Quiz) -> None:
         for question in questions:
             q_answers = question.pop("answers")
             question["quiz"] = quiz
@@ -99,9 +91,7 @@ class QuizMakerSerializer(TaggitSerializer, serializers.ModelSerializer):
             cls.save_answers(q_answers, saved)
 
     @classmethod
-    def save_answers(
-        cls, answers: List[Dict[str, Any]], question: Question
-    ) -> None:
+    def save_answers(cls, answers: List[Dict[str, Any]], question: Question) -> None:
         objs = [Answer(question=question, **answer) for answer in answers]
         Answer.objects.bulk_create(objs)
 
@@ -203,9 +193,7 @@ class ParticipantRelatedQuestionField(serializers.PrimaryKeyRelatedField):
         participant = request.participant
         if not participant:
             return Question.objects.none()
-        return queryset.filter(quiz__id=participant.quiz.id).prefetch_related(
-            "answers"
-        )
+        return queryset.filter(quiz__id=participant.quiz.id).prefetch_related("answers")
 
 
 class ParticipantAnswerSerializer(serializers.ModelSerializer):
@@ -230,9 +218,7 @@ class ParticipantAnswerSerializer(serializers.ModelSerializer):
         assert request.participant is not None, "Participant is not provided"
         validated_data["participant"] = request.participant
         try:
-            return super(ParticipantAnswerSerializer, self).create(
-                validated_data
-            )
+            return super(ParticipantAnswerSerializer, self).create(validated_data)
         except IntegrityError:  # attempt to answer question second time
             raise ValidationError(
                 {NON_FIELD_ERRORS: ["You have already answered this question"]}

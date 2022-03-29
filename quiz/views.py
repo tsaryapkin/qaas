@@ -1,5 +1,6 @@
 import csv
 import datetime
+import json
 from typing import Any, Dict, Optional
 
 from annoying.functions import get_object_or_None
@@ -283,7 +284,9 @@ def daily_report(request: Request) -> HttpResponse:
     }
     report = get_daily_report()
     if format_ == "json":
-        return Response(ReportSerializer(report).data, **response_kwargs)
+        return HttpResponse(
+            json.dumps(ReportSerializer(report).data), **response_kwargs
+        )
     else:
         response = HttpResponse(**response_kwargs)
         writer = csv.writer(response)

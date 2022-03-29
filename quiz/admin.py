@@ -1,14 +1,63 @@
+import logging
+
 from django.contrib import admin, messages
 from django.contrib.admin import display
+from django.contrib.auth.models import Group
+from django.http import HttpResponseRedirect
 from invitations.admin import InvitationAdmin
+from invitations.utils import (
+    get_invitation_admin_add_form,
+    get_invitation_admin_change_form,
+    get_invitation_model,
+)
 from nested_admin.nested import (
     NestedModelAdmin,
     NestedStackedInline,
     NestedTabularInline,
 )
+from taggit.models import Tag
 
+from .exceptions import QuizException
 from .forms import AnswerInlineFormset, QuestionInlineFormset, QuizAdminForm
 from .models import *
+
+logger = logging.getLogger(__name__)
+
+
+Invitation = get_invitation_model()
+InvitationAdminAddForm = get_invitation_admin_add_form()
+InvitationAdminChangeForm = get_invitation_admin_change_form()
+
+admin.site.unregister(
+    Invitation
+)  # so default invitation admin will be re-registered below
+admin.site.unregister(Group)
+admin.site.unregister(Tag)
+
+
+@admin.register(Invitation)
+class InvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "quiz", "sent", "accepted")
+    list_filter = ("quiz",)
+
+    def add_view(self, request, form_url="", extra_context=None):
+        try:
+            return super(InvitationAdmin, self).add_view(
+                request, form_url, extra_context
+            )
+        except QuizException as e:
+            logger.error("Failure to send invitation: smtp server is not available")
+            self.message_user(request, str(e), level=logging.ERROR)
+            return HttpResponseRedirect(request.path)
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:
+            kwargs["form"] = InvitationAdminChangeForm
+        else:
+            kwargs["form"] = InvitationAdminAddForm
+            kwargs["form"].user = request.user
+            kwargs["form"].request = request
+        return super(InvitationAdmin, self).get_form(request, obj, **kwargs)
 
 
 class AnswerInline(NestedTabularInline):
@@ -34,9 +83,6 @@ class QuizAdmin(NestedModelAdmin):
     form = QuizAdminForm
     inlines = [QuestionInline]
 
-    def has_add_permission(self, request, obj=None):
-        return False
-
     @display(description="Author")
     def get_author(self, obj):
         return obj.author.username
@@ -51,11 +97,18 @@ class QuestionAdmin(admin.ModelAdmin):
 
     def delete_model(self, request, obj):
         if obj.quiz.question_cnt == 1:
-            storage = messages.get_messages(request)
-            storage.used = True
-            messages.error(request, "Cannot delete last record. Delete quiz instead")
+            messages.set_level(request, messages.ERROR)
+            self.message_user(
+                request,
+                "You cannot delete the last question. Delete the quiz instead",
+                level=logging.ERROR,
+            )
+            return HttpResponseRedirect(request.path)
         else:
             obj.delete()
+
+    def get_readonly_fields(self, request, obj=None):
+        return ["quiz"] if obj else []
 
 
 @admin.register(QuizParticipant)
@@ -66,7 +119,3 @@ class ParticipantAdmin(admin.ModelAdmin):
     @display(description="Quiz")
     def get_quiz(self, obj):
         return obj.quiz.name
-
-
-InvitationAdmin.list_display = ("email", "quiz", "sent", "accepted")
-InvitationAdmin.list_filter = ("quiz",)

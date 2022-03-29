@@ -75,7 +75,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
         max_length=1000, null=True, blank=True, verbose_name="description"
     )
     slug = models.SlugField(null=False, blank=True, unique=True, verbose_name="slug")
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
 
     objects = DeepQuizQueryset.as_manager()
 
@@ -360,6 +360,7 @@ class Answer(OrderedModel):
             "question",
             "order",
         )
+        unique_together = "question", "answer"
 
     def __str__(self) -> str:
         return self.answer

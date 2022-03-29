@@ -41,6 +41,8 @@ MailHog (to check invites)
 * http://localhost:8025/
 
 
+# API description
+
 ## Navigation
 
 [[Create Quiz](#opIdquizmaker_quizzes_create)]
@@ -291,7 +293,7 @@ Accept: application/json
 `GET /quizmaker/quizzes/{id}/invitees/`
 
 
-> Example responses
+> Example response
 
 ```json
 {
@@ -328,7 +330,7 @@ Accept: application/json
 
 Quiz participants and their scores
 
-> Example responses
+> Example response
 
 ```json
 {
@@ -362,7 +364,7 @@ Accept: application/json
 
 `GET /quizmaker/quizzes/{id}/questions/?search=question_name`
 
-> Example responses
+> Example response
 
 ```json
 [
@@ -399,7 +401,7 @@ Accept: application/json
 
 `GET /quizmaker/quizzes/{id}/progress/`
 
-> Example responses
+> Example response
 
 
 ```json
@@ -442,7 +444,7 @@ Accept: application/json
 Send notifications with results to those who completed the quiz
 
 
-> Example responses
+> Example response
 
 > 200 Response
 
@@ -463,7 +465,7 @@ Accept: application/json
 
 `GET /questions/?search=question&quiz={quiz_id}`
 
-> Example responses
+> Example response
 
 
 ```json
@@ -502,7 +504,7 @@ Accept: application/json
 
 `GET /questions/{id}/`
 
-> Example responses
+> Example response
 
 
 ```json
@@ -544,7 +546,7 @@ Accept: application/json
 `GET /answers/?search=str&question={question_id}`
 
 
-> Example responses
+> Example response
 
 
 ```json
@@ -579,7 +581,7 @@ Host: localhost:8000
 
 `GET /accept-invite/{key}/`
 
-
+> Example response
 ```json
 {
     "quiz": "/api/quizzes/{id}/?token={key}/"
@@ -588,6 +590,8 @@ Host: localhost:8000
 
 
 ## Quizzes
+
+Requires token or authentication
 
 <a id="opIdquizzes_list"></a>
 
@@ -601,7 +605,7 @@ Accept: application/json
 `GET /quizzes/?token={token}`
 
 
-> Example responses
+> Example response
 
 ```json
 {
@@ -627,6 +631,8 @@ Accept: application/json
 
 ## Quiz
 
+Requires token or authentication
+
 <a id="opIdquizzes_read"></a>
 
 ```http
@@ -639,7 +645,7 @@ Accept: application/json
 `GET /quizzes/{id}/?token={token}`
 
 
-> Example responses
+> Example response
 
 
 ```json
@@ -694,7 +700,7 @@ Accept: application/json
 }
 ```
 
-> Example responses
+> Example response
 
 > 201 Response
 
@@ -732,6 +738,8 @@ Accept: application/json
 
 ## My progress
 
+Requires token or authentication
+
 <a id="opIdquizzes_progress"></a>
 
 
@@ -745,7 +753,7 @@ Accept: application/json
 `GET /quizzes/{id}/my-progress/?token={token}`
 
 
-> Example responses
+> Example response
 
 ```json
 {
@@ -783,6 +791,3 @@ Host: localhost:8000
 `GET /report?output_format=json`
 
 `GET /report?output_format=csv`
-
-
-[[Create Quiz](#opIdquizmaker_quizzes_create)]

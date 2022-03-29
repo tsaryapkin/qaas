@@ -8,7 +8,7 @@ from sql_util.utils import SubquerySum
 from .models import *
 
 
-@dataclass(slots=True)
+@dataclass
 class QuizReportEntry:
     title: str
     author: str
@@ -16,7 +16,7 @@ class QuizReportEntry:
     created_at: datetime.datetime
 
 
-@dataclass(slots=True)
+@dataclass
 class QuizParticipantEntry:
     quiz: str
     email: str
@@ -26,7 +26,7 @@ class QuizParticipantEntry:
     created_at: datetime.datetime
 
 
-@dataclass(slots=True)
+@dataclass
 class DailyReport:
     quizzes: List[QuizReportEntry]
     participants: List[QuizParticipantEntry]

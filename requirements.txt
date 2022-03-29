@@ -7,7 +7,7 @@ pytest
 black
 isort
 pre-commit
-djangorestframework-jwt
+djangorestframework_simplejwt
 django-ordered-model
 drf-yasg
 python-jose

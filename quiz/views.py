@@ -20,7 +20,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from core.utils import datetime_to_str
 
-from .filters import QuizFilter
+from .filters import *
 from .forms import CleanInvitationMixin
 from .jobs import notify_participants
 from .models import *
@@ -127,6 +127,7 @@ class QuizMakerViewSet(
     @action(detail=True, methods=["get"])
     def invitees(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
+        self.filterset_class = InviteeFilter
         return self._paginated_response(quiz.invitations.all())
 
     @action(detail=True, methods=["post"])
@@ -140,6 +141,7 @@ class QuizMakerViewSet(
     def participants(self, request, *args, **kwargs) -> Response:
         """Quiz participants and their scores"""
         quiz = self.get_object()
+        self.filterset_class = ParticipantFilter
         return self._paginated_response(quiz.participants.all())
 
     @action(detail=True, methods=["get"])
@@ -154,11 +156,17 @@ class QuizMakerViewSet(
 
 
 class QuestionViewSet(
+    ActionBasedSerializerMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     GenericViewSet,
 ):
     serializer_class = QuestionSerializer
+    filterset_class = QuestionFilter
+
+    serializer_action_classes = {
+        "list": QuestionListSerializer,
+    }
 
     def get_queryset(self) -> QuerySet[Quiz]:
         return Question.objects.filter(quiz__author=self.request.user).prefetch_related(
@@ -190,6 +198,7 @@ class QuizViewSet(
     serializer_class = TakeQuizSerializer
     permission_classes = [AllowAny]
     queryset = Quiz.objects.all()
+    filterset_class = QuizFilter
     token_header = "Quiz-token"
 
     serializer_action_classes = {

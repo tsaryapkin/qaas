@@ -1,5 +1,19 @@
 version: '3'
 services:
+  qaas:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: ["sh", "/code/run.sh"]
+    env_file:
+      - .env
+    volumes:
+    - .:/code
+    ports:
+      - 8000:8000
+    depends_on:
+      - smtp-server
+      - redis
   smtp-server:
     image: mailhog/mailhog
     expose:
@@ -14,3 +28,13 @@ services:
       - "6379:6379"
     expose:
       - 6379
+  celery:
+    build:
+      context: .
+    command: celery -A qaas worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - qaas
+

@@ -30,7 +30,7 @@ InvitationAdminChangeForm = get_invitation_admin_change_form()
 
 admin.site.unregister(
     Invitation
-)  # so default invitation admin will be re-registered below
+)  # default invitation admin will be re-registered below
 admin.site.unregister(Group)
 admin.site.unregister(Tag)
 
@@ -115,6 +115,7 @@ class QuestionAdmin(admin.ModelAdmin):
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ("email", "quiz", "status", "score", "progress")
     search_fields = ("quiz__name", "email")
+    readonly_fields = ("key", "completed_at", "quiz")
 
     @display(description="Quiz")
     def get_quiz(self, obj):

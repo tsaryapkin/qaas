@@ -136,7 +136,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
@@ -147,19 +147,19 @@ REST_FRAMEWORK = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "0.0.0.0"
-EMAIL_PORT = 1025
+EMAIL_HOST = env.str("EMAIL_HOST", "0.0.0.0")
+EMAIL_PORT = env.int("EMAIL_PORT", 1025)
 
-CELERY_BROKER_URL = "redis://0.0.0.0:6379"
-CELERY_RESULT_BACKEND = "redis://0.0.0.0:6379"
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", "redis://0.0.0.0:6379")
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", "redis://0.0.0.0:6379")
 
 SITE_ID = 1
 
 INVITATIONS_INVITATION_MODEL = "quiz.QuizInvitation"
 INVITATIONS_ADMIN_ADD_FORM = "quiz.forms.QuizInvitationAdminAddForm"
 
-MAX_QUESTIONS_PER_QUIZ = env.int("MAX_QUESTIONS_PER_QUIZ", 50)
-MAX_ANSWERS_PER_QUESTION = env.int("MAX_ANSWERS_PER_QUESTION", 10)
-MAX_INVITEES_PER_REQUEST = env.int("MAX_ANSWERS_PER_QUESTION", 50)
+MAX_QUESTIONS_PER_QUIZ = 50
+MAX_ANSWERS_PER_QUESTION = 10
+MAX_INVITEES_PER_REQUEST = 50
 
 CELERY_IMPORTS = ("quiz.jobs",)

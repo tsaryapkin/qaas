@@ -1,5 +1,5 @@
 <div style="margin-top: 15px; margin-left: 40px">
-    <div style="display: inline-flex">
+    <div style="display: inline-flex; margin-bottom: 5px">
         {% url 'daily-report' as report_url %}
         <a href="{% url 'daily-report' %}?output_format=json" style="margin-right: 10px">JSON report</a>
         <a href="{% url 'daily-report' %}?output_format=csv">CSV report</a>

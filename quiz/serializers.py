@@ -25,6 +25,7 @@ __all__ = [
     "ParticipantProgressSerializer",
     "ProgressSerializer",
     "ReportSerializer",
+    "QuestionListSerializer",
 ]
 
 
@@ -66,6 +67,12 @@ class QuestionSerializer(serializers.ModelSerializer):
                 {"answers": "More than one correct answer is specified"}
             )
         return value
+
+
+class QuestionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = "id", "question", "score", "quiz"
 
 
 class QuestionListField(RelatedManagerRepresentationMixin, serializers.ListField):

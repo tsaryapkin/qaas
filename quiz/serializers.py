@@ -215,7 +215,7 @@ class ParticipantAnswerSerializer(serializers.ModelSerializer):
             *args, **kwargs
         )
         if cleaned_data["answer"] not in cleaned_data["question"].answers.all():
-            raise ValidationError({"answer": ["Wrong answer"]})
+            raise ValidationError({"answer": ["Wrong answer id"]})
         return cleaned_data
 
     def create(self, validated_data):

@@ -127,7 +127,6 @@ class ParticipantSerializer(serializers.ModelSerializer):
             "id",
             "email",
             "status",
-            "completed_at",
             "score_str",
             "answered_questions_count",
         )

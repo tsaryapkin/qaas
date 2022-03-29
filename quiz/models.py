@@ -272,9 +272,7 @@ class QuizParticipant(TodayRecordsMixin, TimestampedModel):
     )
     status = StatusField(default=STATUS.accepted, verbose_name="status")
     score = models.PositiveIntegerField(null=True)
-
     key = models.CharField(max_length=100, null=False)
-    completed_at = MonitorField(monitor="status", when=["completed"], null=True)
 
     class Meta:
         verbose_name = _("Participant")
@@ -314,7 +312,8 @@ class QuizParticipant(TodayRecordsMixin, TimestampedModel):
 
     @property
     def score_str(self) -> str:
-        return f"{self.score or self._score} out of {self.quiz.max_score}"
+        score = self.score if self.score is not None else (self._score or 0)
+        return f"{score} out of {self.quiz.max_score}"
 
     def __str__(self) -> str:
         return f"Participant {self.email} - quiz {self.quiz.title}"

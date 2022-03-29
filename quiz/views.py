@@ -152,6 +152,7 @@ class QuizMakerViewSet(
     @action(detail=True, methods=["get"])
     def questions(self, request, *args, **kwargs) -> Response:
         quiz = self.get_object()
+        self.filterset_class = QuestionFilter
         return Response(QuestionSerializer(quiz.questions.all(), many=True).data)
 
 

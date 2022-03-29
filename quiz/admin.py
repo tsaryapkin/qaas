@@ -115,7 +115,7 @@ class QuestionAdmin(admin.ModelAdmin):
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ("email", "quiz", "status", "score", "progress")
     search_fields = ("quiz__name", "email")
-    readonly_fields = ("key", "completed_at", "quiz")
+    readonly_fields = ("key", "quiz")
 
     @display(description="Quiz")
     def get_quiz(self, obj):

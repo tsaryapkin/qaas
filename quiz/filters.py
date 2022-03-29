@@ -13,7 +13,7 @@ __all__ = [
 
 class QuizFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="_search", label="search")
-    created = django_filters.DateFromToRangeFilter()
+    created = django_filters.DateFromToRangeFilter(field_name="created_at")
 
     def _search(self, queryset, name, value):
         return queryset.filter(

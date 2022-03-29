@@ -41,7 +41,7 @@ def _render_notification(
     return msg
 
 
-@app.task
+@app.task(name="notify-participants")
 def notify_participants(quiz_id: int) -> None:
     quiz = get_object_or_None(Quiz, id=quiz_id)
     quiz_summary = quiz.summary()

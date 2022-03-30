@@ -1,5 +1,8 @@
 # QaaS
 
+Application for creation and hosting quizzes
+
+
 ### How to run
 
 ```

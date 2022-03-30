@@ -129,6 +129,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
             "status",
             "score_str",
             "answered_questions_count",
+            "notified",
         )
 
 

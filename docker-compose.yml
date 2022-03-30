@@ -34,6 +34,8 @@ services:
     command: celery -A qaas worker --loglevel=info
     env_file:
       - .env
+    volumes:
+      - .:/code
     depends_on:
       - redis
       - qaas

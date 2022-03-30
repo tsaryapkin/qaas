@@ -5,6 +5,7 @@ from itertools import groupby
 from operator import itemgetter, or_
 from typing import Any, Dict, Iterable, Iterator, Optional, Tuple
 
+from annoying.functions import get_object_or_None
 from django.db import IntegrityError, models, transaction
 from django.db.models import Count, Prefetch, Q, QuerySet, Subquery, Sum
 from django.utils import timezone
@@ -14,7 +15,7 @@ from invitations.adapters import get_invitations_adapter
 from invitations.app_settings import app_settings
 from invitations.base_invitation import AbstractBaseInvitation
 from model_utils import Choices
-from model_utils.fields import MonitorField, StatusField
+from model_utils.fields import StatusField
 from ordered_model.models import OrderedModel
 from rest_framework.reverse import reverse
 from taggit.managers import TaggableManager
@@ -140,7 +141,8 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
         """Max number of scores that can be achieved"""
         return self.questions.all().aggregate(Sum("score"))["score__sum"]
 
-    def summary(self) -> Iterable[Dict[str, Any]]:
+    def summary(self, **filter_params) -> Iterable[Dict[str, Any]]:
+        """Summary about results of participants who completed the quiz"""
         common_context = {"quiz_title": self.title, "max_score": self.max_score}
         participants = (
             self.participants.prefetch_related(
@@ -149,9 +151,10 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
                     queryset=ParticipantAnswer.objects.select_related("answer"),
                 )
             )
-            .filter(status=QuizParticipant.STATUS.completed)
+            .filter(status=QuizParticipant.STATUS.completed, **filter_params)
             .order_by("id", "answers__answer__id")
             .values(
+                "id",
                 "email",
                 "score",
                 "answers__answer__correct",
@@ -163,10 +166,11 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
 
         def map_to_context(participant_data: Tuple[str, Iterator]) -> Dict[str, Any]:
             assert participant_data
-            email, answers = participant_data
+            id_, answers = participant_data
             answers = list(answers)
             context_ = {
-                "email": email,
+                "id": id_,
+                "email": answers[0]["email"],
                 "answers": [
                     {
                         "question": answer["answers__answer__question__question"],
@@ -180,7 +184,7 @@ class Quiz(TodayRecordsMixin, TimestampedModel):
             context_.update(common_context)
             return context_
 
-        return map(map_to_context, groupby(participants, key=itemgetter("email")))  # type: ignore
+        return map(map_to_context, groupby(participants, key=itemgetter("id")))  # type: ignore
 
 
 class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
@@ -239,7 +243,13 @@ class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
 
     def accept(self, request) -> None:
         """Creates participant record from invitation"""
-        user = request.user if request.user.is_authenticated else None
+        # Trying to associate email from invitation with logged in user
+        # If it fails, looking for user in database
+        user = (
+            request.user
+            if request.user.is_authenticated
+            else get_object_or_None(User, email=self.email)
+        )
         with transaction.atomic():
             self.accepted = True
             self.save()
@@ -273,6 +283,7 @@ class QuizParticipant(TodayRecordsMixin, TimestampedModel):
     status = StatusField(default=STATUS.accepted, verbose_name="status")
     score = models.PositiveIntegerField(null=True)
     key = models.CharField(max_length=100, null=False)
+    notified = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Participant")

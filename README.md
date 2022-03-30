@@ -418,7 +418,8 @@ Quiz participants and their scores
             "email": "tes@test.com",
             "status": "accepted",
             "score_str": "0 out of 7",
-            "answered_questions_count": 0
+            "answered_questions_count": 0,
+            "notified": false
         }
     ]
 }

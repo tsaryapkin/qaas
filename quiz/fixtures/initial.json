@@ -1,0 +1,605 @@
+[
+{
+  "model": "quiz.quiz",
+  "pk": 1,
+  "fields": {
+    "created_at": "2022-03-30T11:15:33.243Z",
+    "updated_at": "2022-03-30T11:15:33.243Z",
+    "author": 3,
+    "title": "Quiz 1",
+    "description": "Description",
+    "slug": "quiz-1"
+  }
+},
+{
+  "model": "quiz.quiz",
+  "pk": 2,
+  "fields": {
+    "created_at": "2022-03-30T11:16:50.001Z",
+    "updated_at": "2022-03-30T11:16:50.001Z",
+    "author": 3,
+    "title": "Quiz 2",
+    "description": "",
+    "slug": "quiz-2"
+  }
+},
+{
+  "model": "quiz.quiz",
+  "pk": 3,
+  "fields": {
+    "created_at": "2022-03-30T11:17:32.985Z",
+    "updated_at": "2022-03-30T11:17:32.985Z",
+    "author": 2,
+    "title": "Quiz 3",
+    "description": "",
+    "slug": "quiz-3"
+  }
+},
+{
+  "model": "quiz.quiz",
+  "pk": 4,
+  "fields": {
+    "created_at": "2022-03-30T11:18:17.016Z",
+    "updated_at": "2022-03-30T11:18:17.016Z",
+    "author": 4,
+    "title": "Test quiz",
+    "description": "",
+    "slug": "test-quiz"
+  }
+},
+{
+  "model": "quiz.quiz",
+  "pk": 5,
+  "fields": {
+    "created_at": "2022-03-30T11:20:14.664Z",
+    "updated_at": "2022-03-30T11:20:25.817Z",
+    "author": 3,
+    "title": "Sample 1",
+    "description": "",
+    "slug": "aaaaa"
+  }
+},
+{
+  "model": "quiz.quizinvitation",
+  "pk": 3,
+  "fields": {
+    "accepted": false,
+    "key": "f5hruyaryraa3ryawhbj5cad9i33jgberkn1kqz6fml6fvyhkukbcfx24hqvpyko",
+    "sent": "2022-03-30T12:20:26.360Z",
+    "inviter": null,
+    "quiz": 1,
+    "email": "test1@test.com",
+    "created_at": "2022-03-30T12:20:26.350Z"
+  }
+},
+{
+  "model": "quiz.quizinvitation",
+  "pk": 4,
+  "fields": {
+    "accepted": true,
+    "key": "3sbxcmkfku0vyrlun3u5mkkxnn2pdnpyu0kjntk9ixigk6p4lwf0lcu353q0czyi",
+    "sent": "2022-03-30T12:20:34.711Z",
+    "inviter": null,
+    "quiz": 4,
+    "email": "test2@test.com",
+    "created_at": "2022-03-30T12:20:34.702Z"
+  }
+},
+{
+  "model": "quiz.quizparticipant",
+  "pk": 2,
+  "fields": {
+    "created_at": "2022-03-30T12:20:54.282Z",
+    "updated_at": "2022-03-30T12:23:12.710Z",
+    "email": "test2@test.com",
+    "user": 2,
+    "quiz": 4,
+    "status": "completed",
+    "score": null,
+    "key": "3sbxcmkfku0vyrlun3u5mkkxnn2pdnpyu0kjntk9ixigk6p4lwf0lcu353q0czyi",
+    "notified": false
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 1,
+  "fields": {
+    "order": 0,
+    "quiz": 1,
+    "question": "Question 1",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 2,
+  "fields": {
+    "order": 0,
+    "quiz": 2,
+    "question": "Question 1",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 3,
+  "fields": {
+    "order": 1,
+    "quiz": 2,
+    "question": "Question 2",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 4,
+  "fields": {
+    "order": 2,
+    "quiz": 2,
+    "question": "Question 3",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 5,
+  "fields": {
+    "order": 0,
+    "quiz": 3,
+    "question": "Question question",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 6,
+  "fields": {
+    "order": 1,
+    "quiz": 3,
+    "question": "Some other question",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 7,
+  "fields": {
+    "order": 0,
+    "quiz": 4,
+    "question": "What day is it today?",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 8,
+  "fields": {
+    "order": 1,
+    "quiz": 4,
+    "question": "Question",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 9,
+  "fields": {
+    "order": 0,
+    "quiz": 5,
+    "question": "Question question",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 10,
+  "fields": {
+    "order": 1,
+    "quiz": 5,
+    "question": "Question 2",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.question",
+  "pk": 11,
+  "fields": {
+    "order": 2,
+    "quiz": 5,
+    "question": "Question 3",
+    "score": 1
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 1,
+  "fields": {
+    "order": 0,
+    "question": 1,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 2,
+  "fields": {
+    "order": 1,
+    "question": 1,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 3,
+  "fields": {
+    "order": 0,
+    "question": 2,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 4,
+  "fields": {
+    "order": 1,
+    "question": 2,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 5,
+  "fields": {
+    "order": 2,
+    "question": 2,
+    "answer": "Answer 3",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 6,
+  "fields": {
+    "order": 0,
+    "question": 3,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 7,
+  "fields": {
+    "order": 1,
+    "question": 3,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 8,
+  "fields": {
+    "order": 0,
+    "question": 4,
+    "answer": "Answer 1",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 9,
+  "fields": {
+    "order": 1,
+    "question": 4,
+    "answer": "Answer 2",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 10,
+  "fields": {
+    "order": 2,
+    "question": 4,
+    "answer": "Answer 3",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 11,
+  "fields": {
+    "order": 0,
+    "question": 5,
+    "answer": "Answer 1",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 12,
+  "fields": {
+    "order": 1,
+    "question": 5,
+    "answer": "Answer 2",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 13,
+  "fields": {
+    "order": 2,
+    "question": 5,
+    "answer": "Answer 3",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 14,
+  "fields": {
+    "order": 0,
+    "question": 6,
+    "answer": "Answer 1",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 15,
+  "fields": {
+    "order": 1,
+    "question": 6,
+    "answer": "Answer 2",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 16,
+  "fields": {
+    "order": 2,
+    "question": 6,
+    "answer": "Answer 3",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 17,
+  "fields": {
+    "order": 0,
+    "question": 7,
+    "answer": "Monday",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 18,
+  "fields": {
+    "order": 1,
+    "question": 7,
+    "answer": "Tuesday",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 19,
+  "fields": {
+    "order": 0,
+    "question": 8,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 20,
+  "fields": {
+    "order": 1,
+    "question": 8,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 21,
+  "fields": {
+    "order": 0,
+    "question": 9,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 22,
+  "fields": {
+    "order": 1,
+    "question": 9,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 23,
+  "fields": {
+    "order": 2,
+    "question": 9,
+    "answer": "Answer 3",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 24,
+  "fields": {
+    "order": 3,
+    "question": 9,
+    "answer": "Answer 4",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 25,
+  "fields": {
+    "order": 0,
+    "question": 10,
+    "answer": "Answer 1",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 26,
+  "fields": {
+    "order": 1,
+    "question": 10,
+    "answer": "Answer 2",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 27,
+  "fields": {
+    "order": 0,
+    "question": 11,
+    "answer": "Answer 1",
+    "correct": true
+  }
+},
+{
+  "model": "quiz.answer",
+  "pk": 28,
+  "fields": {
+    "order": 1,
+    "question": 11,
+    "answer": "Answer 2",
+    "correct": false
+  }
+},
+{
+  "model": "quiz.participantanswer",
+  "pk": 1,
+  "fields": {
+    "created_at": "2022-03-30T12:23:04.452Z",
+    "updated_at": "2022-03-30T12:23:04.452Z",
+    "participant": 2,
+    "question": 7,
+    "answer": 18
+  }
+},
+{
+  "model": "quiz.participantanswer",
+  "pk": 2,
+  "fields": {
+    "created_at": "2022-03-30T12:23:12.567Z",
+    "updated_at": "2022-03-30T12:23:12.568Z",
+    "participant": 2,
+    "question": 8,
+    "answer": 20
+  }
+},
+{
+  "model": "users.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$260000$YDvJlBNBbQvk2tpGSggRKA$I13PB17NpebkfxJTotZptfUBLTolxZa9llhuBYIQeMM=",
+    "last_login": "2022-03-30T12:18:08.203Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2022-03-30T11:13:13.752Z",
+    "email": "",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$260000$ZsuBsKCFtFLN29xCTjXghW$YFFOES0msj3M+amathhq4RqdqoN6I5Y44PZZz7CaufI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "test2",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-03-30T11:14:19.299Z",
+    "email": "test2@test.com",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$260000$UVMLFl1zBFwhTuJv6Vgy3C$GDaiuBE4nc89soaGAyiTHFdWAwDLoVhKMHKERZIoMco=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "test1",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-03-30T11:14:29.071Z",
+    "email": "test1@test.com",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$260000$vDYObBgmz37W67F5cEIgUq$DJhI+gQ+i3EgBsjdaIifv+tfTfwI/WDpHDKK4oyuP5A=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "test3",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-03-30T11:14:39.719Z",
+    "email": "test3@test.com",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$260000$3VntL8DNkT05Fe5MKiErz8$AzJgff8ee2ksZqDEpDCtll8g9gFcT7bfADDIU7FYLBU=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "test4",
+    "first_name": "",
+    "last_name": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-03-30T11:14:49.830Z",
+    "email": "test4@test.com",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

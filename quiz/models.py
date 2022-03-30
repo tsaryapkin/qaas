@@ -238,18 +238,17 @@ class QuizInvitation(TodayRecordsMixin, AbstractBaseInvitation):
         self.sent = timezone.now()
         self.save()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Quiz invite: {self.email}"
 
     def accept(self, request) -> None:
         """Creates participant record from invitation"""
-        # Trying to associate email from invitation with logged in user
-        # If it fails, looking for user in database
-        user = (
-            request.user
-            if request.user.is_authenticated
-            else get_object_or_None(User, email=self.email)
+        # Trying to associate email from invitation with user from the database
+        # If there is no one, associate participant with logged in user
+        user = get_object_or_None(User, email=self.email) or (
+            request.user if request.user.is_authenticated else None
         )
+
         with transaction.atomic():
             self.accepted = True
             self.save()

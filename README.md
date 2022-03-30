@@ -40,8 +40,17 @@ MailHog (to check invites and notifications)
 
 * http://localhost:8025/
 
+### Test credentials
+* admin - admin
+* test1 - test
+* test2 - test
 
 # API description
+
+All actions of a quiz creator require authentication.
+
+All actions of a quiz participant require either token from invitation (can be passed as a get parameter ?token={token},
+or a header "Quiz-token") or authentication
 
 ## Navigation
 
@@ -208,7 +217,7 @@ Accept: application/json
         },
     ],
     "tags": [
-        "tag",
+        "tag"
     ]
 }
 ```

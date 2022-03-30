@@ -114,9 +114,22 @@ class QuestionAdmin(admin.ModelAdmin):
 @admin.register(QuizParticipant)
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = ("email", "quiz", "status", "score", "progress")
+    list_filter = ("quiz", "status")
     search_fields = ("quiz__name", "email")
-    readonly_fields = ("key", "quiz")
+    readonly_fields = ("key", "quiz", "notified")
 
     @display(description="Quiz")
     def get_quiz(self, obj):
         return obj.quiz.name
+
+
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = ("answer", "question", "correct")
+    list_filter = ("question__quiz",)
+    search_fields = ("answer",)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.question.answers.count() <= 2:
+            return False
+        return True

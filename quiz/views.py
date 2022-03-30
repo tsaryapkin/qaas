@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import QuerySet
 from django.http import HttpResponse
+from django.urls import reverse
 from invitations.exceptions import AlreadyAccepted, AlreadyInvited
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -273,7 +274,11 @@ def accept_invitation(request, key) -> Response:
         return Response(status=410, exception=True)
     if not invitation.accepted:
         invitation.accept(request)
-    return Response(data={"quiz": f"{invitation.quiz.get_absolute_url()}?token={key}"})
+
+    quiz_url = request.build_absolute_uri(
+        reverse("quizzes-detail", args=[invitation.quiz.id])
+    )
+    return Response(data={"quiz": f"{quiz_url}?token={key}"})
 
 
 @api_view(["GET"])

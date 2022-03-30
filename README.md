@@ -36,7 +36,7 @@ Admin
 
 * http://localhost:8000/admin
 
-MailHog (to check invites)
+MailHog (to check invites and notifications)
 
 * http://localhost:8025/
 
@@ -64,6 +64,81 @@ MailHog (to check invites)
 [[Quizzes for participants](#opIdquizzes_list)]
 
 [[Answer a question](#opIdquizzes_answer)]
+
+
+# Authentication
+
+Basic, session or JWT
+
+## Obtain token
+
+<a id="opIdtoken_create"></a>
+
+
+```http
+POST http://localhost:8000/api/token/ HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Accept: application/json
+
+```
+
+`POST /token/`
+
+Takes a set of user credentials and returns an access and refresh JSON web
+token pair to prove the authentication of those credentials.
+
+
+
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+
+> 201 Response
+
+```json
+{
+    "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTY0ODcwMDA3NiwiaWF0IjoxNjQ4NjEzNjc2LCJqdGkiOiJhYzg2ZWU0MDkxMDc0Y2RlOThlMzhlMjI2YTVjNmExNyIsInVzZXJfaWQiOjJ9.Y_lFEKTUvaC1xbYw3MnmlSVNPtMJpl6vFLbQdqitrcw",
+    "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjQ4NjEzOTc2LCJpYXQiOjE2NDg2MTM2NzYsImp0aSI6IjdkMWQ5YzJhM2QwNTQ5YWZiNGRmMTk0YWQ2YWI2NjYwIiwidXNlcl9pZCI6Mn0.AcTZ9a-iNNnkrb5JN3qLIXP4xcGbSDuQyjDkNgd-rPw"
+}
+```
+
+# Sign up
+
+## users_signup_create
+
+<a id="opIdusers_signup_create"></a>
+
+
+```http
+POST http://localhost:8000/api/users/signup/ HTTP/1.1
+Host: localhost:8000
+
+```
+
+`POST /users/signup/`
+
+```json
+{
+    "username": "username",
+    "password": "qaz",
+    "email": "e@e.com"
+}
+```
+
+> Response
+
+```json
+{
+    "id": 4,
+    "username": "username",
+    "email": "e@e.com"
+}
+```
 
 # Quizmaker
 
@@ -584,7 +659,7 @@ Host: localhost:8000
 > Example response
 ```json
 {
-    "quiz": "/api/quizzes/{id}/?token={key}/"
+    "quiz": "http://localhost:8000/api/quizzes/2/?token=6tmst0aizlsggstajinbe9ionqu9uuzocxkj1qbpsad1sok7egsiniignoskik4t"
 }
 ```
 

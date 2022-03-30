@@ -5,17 +5,23 @@ services:
       context: .
       dockerfile: ./Dockerfile
     command: ["sh", "/code/run.sh"]
+    entrypoint: ["sh", "/code/docker-entrypoint.sh"]
     env_file:
       - .env
     volumes:
     - .:/code
+    networks:
+      - main
     ports:
       - 8000:8000
     depends_on:
+      - db
       - smtp-server
       - redis
   smtp-server:
     image: mailhog/mailhog
+    networks:
+      - main
     expose:
       - 1025
       - 8025
@@ -26,17 +32,36 @@ services:
     image: redis:alpine
     ports:
       - "6379:6379"
+    networks:
+      - main
     expose:
       - 6379
+  db:
+    image: postgres:12
+    networks:
+      - main
+    volumes:
+      - qaas_data:/var/lib/postgresql/data/
+    environment:
+      - "POSTGRES_DB=qaas"
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
   celery:
     build:
       context: .
     command: celery -A qaas worker --loglevel=info
+    networks:
+      - main
     env_file:
       - .env
-    volumes:
-      - .:/code
-    depends_on:
-      - redis
-      - qaas
 
+    depends_on:
+      - qaas
+      - redis
+      - db
+
+networks:
+  main:
+
+volumes:
+  qaas_data:

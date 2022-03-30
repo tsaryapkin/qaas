@@ -2,7 +2,12 @@ import pytest
 from faker import Faker
 
 from quiz.models import *
-from tests.factories import QuizFactory, QuizParticipantFactory, UserFactory
+from tests.factories import (
+    QuizFactory,
+    QuizInvitationFactory,
+    QuizParticipantFactory,
+    UserFactory,
+)
 
 fake = Faker()
 
@@ -11,6 +16,10 @@ pytestmark = pytest.mark.django_db
 
 class FakeUser:
     is_authenticated = False
+
+
+class FakeRequest:
+    user = FakeUser()
 
 
 def test_quiz_empty_queryset_without_user_and_participant():
@@ -55,3 +64,25 @@ def test_participant_status_changes(quiz):
     )
     participant.refresh_from_db()
     assert participant.status == QuizParticipant.STATUS.completed
+
+
+def test_participant_final_score_set(quiz):
+    participant = QuizParticipantFactory(quiz=quiz)
+    assert participant.status == QuizParticipant.STATUS.accepted
+    questions = list(participant.quiz.questions.all())
+    for question in questions:
+        ParticipantAnswer.objects.create(
+            participant=participant, question=question, answer=question.answers.first()
+        )
+    participant.refresh_from_db()
+    assert participant.status == QuizParticipant.STATUS.completed
+    assert participant.score >= 0
+
+
+def test_user_associated_with_participant_if_exists():
+    invitation = QuizInvitationFactory()
+    user = UserFactory(email=invitation.email)
+    invitation.accept(FakeRequest())
+    participant = QuizParticipant.objects.get(email=invitation.email)
+    assert participant is not None
+    assert participant.user == user

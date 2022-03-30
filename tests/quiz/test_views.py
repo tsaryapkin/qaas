@@ -5,6 +5,7 @@ import pytest
 from faker import Faker
 from rest_framework.reverse import reverse
 
+from core.utils import generate_random_string
 from tests.factories import *
 
 fake = Faker()
@@ -18,10 +19,10 @@ def test_fail_to_create_quiz_too_many_questions(client, user):
         reverse("quizmaker-list"),
         data=json.dumps(
             {
-                "title": fake.sentence(),
+                "title": generate_random_string(),
                 "questions": [
                     {
-                        "question": fake.sentence(),
+                        "question": generate_random_string(),
                         "answers": [
                             {"answer": "1", "correct": True},
                             {"answer": "2", "correct": False},
@@ -43,10 +44,10 @@ def test_fail_to_create_quiz_too_many_answers(client, user):
         reverse("quizmaker-list"),
         data=json.dumps(
             {
-                "title": fake.sentence(),
+                "title": generate_random_string(),
                 "questions": [
                     {
-                        "question": fake.sentence(),
+                        "question": generate_random_string(),
                         "answers": [
                             {"answer": "1", "correct": True},
                             {"answer": "2", "correct": False},
@@ -72,10 +73,10 @@ def test_fail_to_create_quiz_multiple_right_answers(client, user):
         reverse("quizmaker-list"),
         data=json.dumps(
             {
-                "title": fake.sentence(),
+                "title": generate_random_string(),
                 "questions": [
                     {
-                        "question": fake.sentence(),
+                        "question": generate_random_string(),
                         "answers": [
                             {"answer": "1", "correct": True},
                             {"answer": "2", "correct": True},
@@ -99,10 +100,10 @@ def test_fail_to_create_quiz_no_right_answers(client, user):
         reverse("quizmaker-list"),
         data=json.dumps(
             {
-                "title": fake.sentence(),
+                "title": generate_random_string(),
                 "questions": [
                     {
-                        "question": fake.sentence(),
+                        "question": generate_random_string(),
                         "answers": [
                             {"answer": "1", "correct": False},
                             {"answer": "2", "correct": False},
@@ -126,10 +127,10 @@ def test_create_correct(client, user):
         reverse("quizmaker-list"),
         data=json.dumps(
             {
-                "title": fake.sentence(),
+                "title": generate_random_string(),
                 "questions": [
                     {
-                        "question": fake.sentence(),
+                        "question": generate_random_string(),
                         "answers": [
                             {"answer": "1", "correct": True},
                             {"answer": "2", "correct": False},
@@ -190,3 +191,48 @@ def test_can_accept_invitation(client):
     assert response.status_code == 200
     response = client.get(url)
     assert response.status_code == 200
+
+
+def test_cannot_see_other_quizzes_author(client, user):
+    QuizFactory(questions=[])
+    client.force_login(user)
+    url = reverse("quizmaker-list")
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["count"] == 0
+
+
+def test_can_see_own_quizzes_author(client, user):
+    quiz = QuizFactory(questions=[], author=user)
+    client.force_login(user)
+    url = reverse("quizmaker-list")
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    url = reverse("quizmaker-detail", args=[quiz.id])
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["id"] == quiz.id
+
+
+def test_can_my_quiz_as_participant(client, user):
+    participant = QuizParticipantFactory(user=user)
+    quiz = participant.quiz
+    client.force_login(user)
+    url = reverse("quizzes-list")
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    url = reverse("quizzes-detail", args=[quiz.id])
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["id"] == quiz.id
+
+
+def test_cannot_see_quizzes_that_i_am_not_invited(client, user):
+    QuizFactory(questions=[])
+    client.force_login(user)
+    url = reverse("quizzes-list")
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.data["count"] == 0

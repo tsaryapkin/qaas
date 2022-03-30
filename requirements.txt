@@ -22,3 +22,4 @@ pytest-mock~=3.7
 django-sql-utils==0.6.1
 djangorestframework-dataclasses~=1.1.1
 django-nested-admin~=3.4
+psycopg2-binary

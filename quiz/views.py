@@ -226,14 +226,15 @@ class QuizViewSet(
             response.headers[self.token_header] = token
         return response
 
+    def _get_participant(self, request) -> Optional[QuizParticipant]:
+        return request.participant or get_object_or_None(
+            QuizParticipant, user=request.user, quiz=self.get_object()
+        )
+
     @action(detail=True, methods=["post"])
     def answer(self, request, *args, **kwargs) -> Response:
         """Participant's answer to the question of the quiz"""
-        participant = request.participant
-        if not participant:
-            participant = request.participant = get_object_or_None(
-                QuizParticipant, user=request.user
-            )
+        participant = request.participant = self._get_participant(request)
         if participant.status == QuizParticipant.STATUS.completed:
             raise APIException(
                 detail="You have already completed this quiz",
@@ -256,7 +257,7 @@ class QuizViewSet(
         """
         Participant's progress
         """
-        serializer = self.get_serializer(request.participant)
+        serializer = self.get_serializer(self._get_participant(request))
         return Response(serializer.data)
 
 
